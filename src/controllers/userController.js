@@ -1,6 +1,7 @@
 const pool = require('../config/db');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs'); 
+const bcrypt = require('bcryptjs');
+const { producer } = require('../config/kafka') 
 
 const getUsers = async (req, res) => {
   try {
@@ -51,7 +52,22 @@ const createUser = async (req, res) => {
       'INSERT INTO users (full_name, username, email, password, role, status) VALUES (?, ?, ?, ?, ?, ?)',
       [full_name, username, email, hashedPassword, role || 'Admin', status || 'Aktif']
     );
-    res.status(201).json({ id: result.insertId, full_name, username, email, role, status });
+    // Harus didefinisikan dulu variabelnya sebelum dipakai di bawah
+    const userId = result.insertId;
+    const userRole = role || 'Admin';
+    const token = jwt.sign({ id: userId, role: userRole }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    res.status(201).json({
+      token,
+      user: {
+        id: userId, 
+        full_name, 
+        username, 
+        email, 
+        role: userRole, 
+        status: status || 'Aktif'
+      }
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

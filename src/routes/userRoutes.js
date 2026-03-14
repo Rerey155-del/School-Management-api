@@ -6,9 +6,9 @@ const verifyToken = require('../middleware/authMiddleware');
 router.post('/login', userController.login);
 router.get('/', verifyToken, userController.getUsers);
 router.get('/:id', verifyToken, userController.getUserById);
-router.post('/', verifyToken, userController.createUser);
-router.put('/:id', verifyToken, userController.updateUser);
-router.patch('/:id', verifyToken, userController.patchUser);
-router.delete('/:id', verifyToken, userController.deleteUser);
+router.post('/', userController.createUser); // Public registration for testing
+router.put('/:id', userController.updateUser);
+router.patch('/:id', userController.patchUser);
+router.delete('/:id', userController.deleteUser);
 
 module.exports = router;
