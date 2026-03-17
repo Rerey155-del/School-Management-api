@@ -1,14 +1,15 @@
 const pool = require('../config/db');
 
-const logAudit = async(entity_name, entity_id, action, name,old_value,new_value, ) => {
- try {
-  await pool.query(
-    'INSERT INTO audit_logs (entity_name, entity_id, action, name, old_value, new_value,) VALUES (?,?,?,?,?,?)', [entity_name, entity_id, action, name, JSON.stringify(old_value), JSON.stringify(new_value)]
-  );
- } catch (error) {
-  console.error('Error logging audit:', error);
- }
-}
+const logAudit = async (entity_name, entity_id, action, name, old_value, new_value) => {
+  try {
+    await pool.query(
+      'INSERT INTO audit_logs (entity_name, entity_id, action, name, old_value, new_value) VALUES (?,?,?,?,?,?)',
+      [entity_name, entity_id, action, name, JSON.stringify(old_value), JSON.stringify(new_value)]
+    );
+  } catch (error) {
+    console.error('Error logging audit:', error);
+  }
+};
 
 // List all teachers
 const getTeachers = async (req, res) => {
@@ -54,24 +55,25 @@ const createTeacher = async (req, res) => {
 // Update an existing teacher (PUT)
 const updateTeacher = async (req, res) => {
   const { name, nip, email, department, status } = req.body;
+  const id = req.params.id;
   try {
-    const [result] = await pool.query(
-      'UPDATE teachers SET name = ?, nip = ?, email = ?, department = ?, status = ? WHERE id = ?',
-      [name, nip, email, department, status, req.params.id]
-    );
-    if (result.affectedRows === 0) return res.status(404).json({ message: "Teacher not found" });
-    
+    // 1. Ambil data lama untuk audit log
+    const [rows] = await pool.query('SELECT * FROM teachers WHERE id = ?', [id]);
+    if (rows.length === 0) return res.status(404).json({ message: "Teacher not found" });
     const oldData = rows[0];
 
+    // 2. Eksekusi Update
     await pool.query(
       'UPDATE teachers SET name = ?, nip = ?, email = ?, department = ?, status = ? WHERE id = ?',
       [name, nip, email, department, status, id]
-    )
-     const newData = { id, name, nip, email, department, status };
+    );
+    
+    const newData = { id, name, nip, email, department, status };
 
+    // 3. Catat Audit Log
     await logAudit('teachers', id, 'UPDATE', 'Admin system', oldData, newData);
 
-    res.json({ id, name, nip, email, department, status });
+    res.json(newData);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
