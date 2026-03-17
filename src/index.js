@@ -22,7 +22,6 @@ const subjectRoutes = require('./routes/subjectRoutes');
 const classRoutes = require('./routes/classRoutes');
 const scheduleRoutes = require('./routes/scheduleRoutes');
 const { connectKafka, runConsumer } = require('./config/kafka');
-
 const announcementRoutes = require('./routes/announcementRoutes');
 
 app.use('/api/users', userRoutes);
@@ -65,13 +64,13 @@ app.use((err, req, res, next) => {
 
 app.listen(PORT, async () => {
   console.log(`http://localhost:${PORT}`);
-    
+
   // Inisialisasi Kafka
   try {
-      await connectKafka();
-      await runConsumer('announcements');
-      console.log('Kafka siap digunakan');
+    await connectKafka();
+    await runConsumer('announcements');
+    console.log('Kafka siap digunakan');
   } catch (error) {
-      console.error('Gagal inisialisasi Kafka:', error);
+    console.error('Gagal inisialisasi Kafka:', error);
   }
 });
