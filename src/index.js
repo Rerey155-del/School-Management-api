@@ -23,6 +23,7 @@ const classRoutes = require('./routes/classRoutes');
 const scheduleRoutes = require('./routes/scheduleRoutes');
 const { connectKafka, runConsumer } = require('./config/kafka');
 const announcementRoutes = require('./routes/announcementRoutes');
+const systemRoutes = require('./routes/systemRoutes');
 
 app.use('/api/users', userRoutes);
 app.use('/api/teachers', teacherRoutes);
@@ -31,6 +32,7 @@ app.use('/api/subjects', subjectRoutes);
 app.use('/api/classes', classRoutes);
 app.use('/api/schedules', scheduleRoutes);
 app.use('/api/announcements', announcementRoutes);
+app.use('/api/system', systemRoutes);
 
 app.get('/api/health', (req, res) => {
   res.status(200).json({
